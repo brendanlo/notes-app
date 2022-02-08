@@ -39,6 +39,6 @@ def show_register_form():
         db.session.commit()
 
     else:
-        form.username.errors = ["Value is invalid"]
+        form.errors = ["Value is invalid"]
 
     return render_template('register.html', form=form)
