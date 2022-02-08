@@ -11,16 +11,10 @@ class User(db.Model):
 
     __tablename__ = 'users'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True,
-        autoincrement=True
-    )
-
     username = db.Column(
         db.String(20),
+        primary_key=True,
         nullable=False,
-        unique=True
     )
 
     password = db.Column(
@@ -57,3 +51,17 @@ class User(db.Model):
             first_name=first_name,
             last_name=last_name
             )
+
+    @classmethod
+    def authenticate(cls, username, password):
+        """Validate that the user exists and password is correct
+        
+        Return user if valid; else return False
+        """
+
+        user = cls.query.filter_by(username=username).one_or_none()
+
+        if user and bcrypt.check_password_hash(user.password, password):
+            return user
+        else:
+            return False

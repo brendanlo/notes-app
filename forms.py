@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField
+from wtforms import StringField, PasswordField
 from wtforms.validators import InputRequired
 
 """Forms for Notes application"""
@@ -9,7 +9,7 @@ class RegisterForm(FlaskForm):
 
     username = StringField("Username",
                 validators=InputRequired())
-    password = StringField("Password",
+    password = PasswordField("Password",
                 validators=InputRequired())
     email = StringField("E-Email Address",
                 validators=InputRequired())
@@ -18,3 +18,10 @@ class RegisterForm(FlaskForm):
     last_name = StringField("Last Name",
                 validators=InputRequired())
 
+class LoginForm(FlaskForm):
+    """Form for logging a user in"""
+
+    username = StringField("Username",
+                validators=InputRequired())
+    password = PasswordField("Password",
+                validators=InputRequired())
