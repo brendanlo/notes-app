@@ -1,15 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
-    
+    {% for msg in get_flashed_messages() %}
+    <p> {{ msg }} </p>
+    {% endfor %}
+
+    </p>
+    <nav>
+        {% if "username" in session %}
+        <li><a href="/secret">Secret</a></li>
+        <li>
+            <form id='nav-logout' method="POST" action="/logout">
+                {{form.hidden_tag()}}
+                <button type='submit'>Logout</button>
+            </form>
+        </li>
+
+        {% else %}
+        <li><a href='/login'>Login</a></li>
+        <li><a href="/register">Register</a></li>
+        {% endif %}
+    </nav>
     {% block title %}
-    
+
     {% endblock %}
 
     {% block content %}
@@ -17,4 +38,5 @@
     {% endblock %}
 
 </body>
+
 </html>

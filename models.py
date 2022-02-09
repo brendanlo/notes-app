@@ -50,12 +50,12 @@ class User(db.Model):
             email=email,
             first_name=first_name,
             last_name=last_name
-            )
+        )
 
     @classmethod
     def authenticate(cls, username, password):
         """Validate that the user exists and password is correct
-        
+
         Return user if valid; else return False
         """
 
@@ -65,3 +65,10 @@ class User(db.Model):
             return user
         else:
             return False
+
+
+def connect_db(app):
+    """connect to database"""
+
+    db.app = app
+    db.init_app(app)

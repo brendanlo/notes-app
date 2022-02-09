@@ -3,16 +3,17 @@
 from flask import Flask, render_template, redirect, session, flash
 
 from models import db, connect_db, User
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, CSRFProtectForm
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///users'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///notes'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "oh-so-secret"
 app.config['SQLALCHEMY_ECHO'] = True
 
 connect_db(app)
+db.create_all()
 
 
 @app.get('/')
@@ -29,6 +30,9 @@ def show_register_form():
     form = RegisterForm()
 
     if form.validate_on_submit():
+        # all_users = User.query.all()
+        # if email is in (all_users.email)
+
         username = form.username.data
         password = form.password.data
         email = form.email.data
@@ -40,12 +44,12 @@ def show_register_form():
         db.session.add(user)
         db.session.commit()
 
-        return redirect('/secret')
+        # add user to flask session
+
+        return redirect('/login')  # user/username
 
     else:
-        form.errors = ["Value is invalid"]
-
-    return render_template('register.html', form=form)
+        return render_template('register.html', form=form)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -66,7 +70,7 @@ def show_login_form():
             return redirect(f'/users/{username}')
 
         else:
-            form.errors = ["Username/password is incorrect"]
+            form.username.errors = ["Username/password is incorrect"]
 
     return render_template('login.html', form=form)
 
@@ -76,21 +80,38 @@ def show_user_details(username):
     """Shows user detail page"""
 
     user = User.query.get_or_404(username)
+    form = CSRFProtectForm()
 
+    # check username in the session matches endpoint
     if "username" not in session:
         flash("You are not authorized. Go away.")
         return redirect('/')
 
     else:
-        return render_template(f'/users/{username}', user=user)
+        return render_template('user_details.html', user=user, form=form)
 
-# @app.get('/secret')
-# def show_secret_page():
-#     """Shows secret page if user is authorized"""
 
-#     if "username" not in session:
-#         flash("You are not authorized. Go away.")
-#         return redirect('/')
+@app.post('/logout')
+def logout_user():
+    """Logging out the current user, redirects to root"""
 
-#     else:
-#         return render_template('secret.html')
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+        session.pop('username', None)
+
+    return redirect('/')
+
+
+@app.get('/secret')
+def show_secret_page():
+    """Shows secret page if user is authorized"""
+
+    # do we need to call form for every page bc the logout button needs form.hidden_tag()
+    form = CSRFProtectForm()
+
+    if "username" not in session:
+        flash("You are not authorized. Go away.")
+        return redirect('/')
+    else:
+        return render_template('secret.html', form=form)
