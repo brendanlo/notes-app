@@ -30,5 +30,15 @@ class LoginForm(FlaskForm):
                              validators=[InputRequired()])
 
 
+class AddNoteForm(FlaskForm):
+    """Form for adding note"""
+
+    title = StringField("Title",
+                        validators=[InputRequired(), Length(max=100)])
+
+    content = StringField("Content",
+                        validators=[InputRequired()])
+
+
 class CSRFProtectForm(FlaskForm):
     """Emtpy form just for CSRF protection"""

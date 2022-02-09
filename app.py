@@ -2,8 +2,8 @@
 
 from flask import Flask, render_template, redirect, session, flash
 
-from models import db, connect_db, User
-from forms import RegisterForm, LoginForm, CSRFProtectForm
+from models import db, connect_db, User, Note
+from forms import RegisterForm, LoginForm, CSRFProtectForm, AddNoteForm
 
 app = Flask(__name__)
 
@@ -83,7 +83,7 @@ def show_user_details(username):
     form = CSRFProtectForm()
 
     # check username in the session matches endpoint
-    if "username" not in session:
+    if user.username != session['username']:
         flash("You are not authorized. Go away.")
         return redirect('/')
 
@@ -110,8 +110,52 @@ def show_secret_page():
     # do we need to call form for every page bc the logout button needs form.hidden_tag()
     form = CSRFProtectForm()
 
-    if "username" not in session:
+    if 'username' not in session:
         flash("You are not authorized. Go away.")
         return redirect('/')
     else:
         return render_template('secret.html', form=form)
+
+
+@app.post('/users/<username>/delete')
+def delete_user(username):
+    """Deletes user"""
+
+    user = User.query.get_or_404(username)
+    form = CSRFProtectForm()
+
+    #Need to add validate_on_submit
+    
+    if user.username != session['username']:
+        flash("You are not authorized. Go away.")
+        return redirect('/')
+    else:
+        Note.query.filter_by(owner=username).delete()
+        User.query.filter_by(username=username).delete()
+        db.session.commit()
+        session.pop('username', None)
+        flash("User deleted")
+        return redirect('/')
+
+@app.route('/users/<username>/notes/add', methods=["GET", "POST"])
+def add_note(username):
+    """Shows add note form"""
+
+    user = User.query.get_or_404(username)
+    form = AddNoteForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        owner = username
+
+        note = Note(title=title, content=content, owner=owner)
+
+        db.session.add(note)
+        db.session.commit()
+
+        return redirect(f'/users/{username}')
+
+    else:
+        return render_template('add_note.html', form=form)
+

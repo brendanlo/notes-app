@@ -12,14 +12,27 @@
 <h2>Notes</h2>
 
 <ul>
-    <li>Note 1</li>
+    {% for note in user.notes %}
+        <li> Title: {{ note.title }}
+             Content: {{ note.content }}
+             Owner: {{ note.owner }}
+
+             <a href="/notes/{{ note.id }}/update">
+                 <button type="button">Edit Note</button>
+             </a>
+
+             <form id="delete-note" method="POST" action="/notes/{{ note.id }}/delete">
+                 <button type="submit">Delete Note</button>
+            </form>
+        </li>
+    {% endfor %}
 </ul>
 
-<form id="add-note" method="POST">
-    <button type="submit">Add Note</button>
-</form>
+<a href="/users/{{ user.username }}/notes/add">
+    <button type="button">Add Note</button>
+</a>
 
-<form id="delete-user" method="POST">
+<form id="delete-user" method="POST" action="/users/{{ user.username }}/delete">
     <button type="submit">Delete User</button>
 </form>
 
